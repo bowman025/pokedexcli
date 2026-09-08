@@ -33,3 +33,5 @@ go.work.sum
 
 # Project specific binary
 pokedexcli
+
+repl.log

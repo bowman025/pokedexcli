@@ -2,31 +2,18 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"strings"
+
+	"github.com/bowman025/pokedexcli/internal/pokeapi"
 )
 
 type config struct {
 	commands         map[string]cliCommand
 	nextLocationsURL *string
 	prevLocationsURL *string
-	callPokeApi      func(*string) (pokeResponse, error)
-}
-
-type pokeResponse struct {
-	Count    int            `json:"count"`
-	Next     *string        `json:"next"`
-	Previous *string        `json:"previous"`
-	Results  []LocationArea `json:"results"`
-}
-
-type LocationArea struct {
-	Name string `json:"name"`
-	Url  string `json:"url"`
+	callPokeApi      func(*string) (pokeapi.PokeResponse, error)
 }
 
 type cliCommand struct {
@@ -97,30 +84,4 @@ func startRepl(conf *config) {
 func cleanInput(text string) []string {
 	lowText := strings.ToLower(text)
 	return strings.Fields(lowText)
-}
-
-func getPokeResponse(urlAddress *string) (pokeResponse, error) {
-	urlValue := "https://pokeapi.co/api/v2/location-area"
-	if urlAddress != nil {
-		urlValue = *urlAddress
-	}
-
-	res, err := http.Get(urlValue)
-	if err != nil {
-		return pokeResponse{}, fmt.Errorf("API error: %v", err)
-	}
-	defer res.Body.Close()
-
-	data, err := io.ReadAll(res.Body)
-	if err != nil {
-		return pokeResponse{}, fmt.Errorf("error reading the request: %v", err)
-	}
-
-	pokeRes := pokeResponse{}
-	err = json.Unmarshal(data, &pokeRes)
-	if err != nil {
-		return pokeResponse{}, fmt.Errorf("error during unmarshal: %v", err)
-	}
-
-	return pokeRes, nil
 }

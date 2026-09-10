@@ -2,13 +2,31 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"strings"
 )
 
 type config struct {
-	commands map[string]cliCommand
+	commands         map[string]cliCommand
+	nextLocationsURL *string
+	prevLocationsURL *string
+	callPokeApi      func(*string) (pokeResponse, error)
+}
+
+type pokeResponse struct {
+	Count    int            `json:"count"`
+	Next     *string        `json:"next"`
+	Previous *string        `json:"previous"`
+	Results  []LocationArea `json:"results"`
+}
+
+type LocationArea struct {
+	Name string `json:"name"`
+	Url  string `json:"url"`
 }
 
 type cliCommand struct {
@@ -29,6 +47,16 @@ func getCommands() map[string]cliCommand {
 			description: "Displays a help message",
 			callback:    commandHelp,
 		},
+		"map": {
+			name:        "map",
+			description: "Displays 20 location areas",
+			callback:    commandMap,
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "Displays previous 20 location areas",
+			callback:    commandMapB,
+		},
 	}
 }
 
@@ -47,6 +75,43 @@ func commandHelp(conf *config) error {
 
 	for _, command := range conf.commands {
 		fmt.Printf("%s: %s\n", command.name, command.description)
+	}
+
+	return nil
+}
+
+func commandMap(conf *config) error {
+	pokeRes, err := conf.callPokeApi(conf.nextLocationsURL)
+	if err != nil {
+		return err
+	}
+
+	conf.nextLocationsURL = pokeRes.Next
+	conf.prevLocationsURL = pokeRes.Previous
+
+	for _, locArea := range pokeRes.Results {
+		fmt.Println(locArea.Name)
+	}
+
+	return nil
+}
+
+func commandMapB(conf *config) error {
+	if conf.prevLocationsURL == nil {
+		fmt.Println("you're on the first page")
+		return nil
+	}
+
+	pokeRes, err := conf.callPokeApi(conf.prevLocationsURL)
+	if err != nil {
+		return err
+	}
+
+	conf.nextLocationsURL = pokeRes.Next
+	conf.prevLocationsURL = pokeRes.Previous
+
+	for _, locArea := range pokeRes.Results {
+		fmt.Println(locArea.Name)
 	}
 
 	return nil
@@ -89,4 +154,30 @@ func startRepl(conf *config) {
 func cleanInput(text string) []string {
 	lowText := strings.ToLower(text)
 	return strings.Fields(lowText)
+}
+
+func getPokeResponse(urlAddress *string) (pokeResponse, error) {
+	urlValue := "https://pokeapi.co/api/v2/location-area"
+	if urlAddress != nil {
+		urlValue = *urlAddress
+	}
+
+	res, err := http.Get(urlValue)
+	if err != nil {
+		return pokeResponse{}, fmt.Errorf("API error: %v", err)
+	}
+	defer res.Body.Close()
+
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		return pokeResponse{}, fmt.Errorf("error reading the request: %v", err)
+	}
+
+	pokeRes := pokeResponse{}
+	err = json.Unmarshal(data, &pokeRes)
+	if err != nil {
+		return pokeResponse{}, fmt.Errorf("error during unmarshal: %v", err)
+	}
+
+	return pokeRes, nil
 }

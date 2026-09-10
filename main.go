@@ -2,7 +2,8 @@ package main
 
 func main() {
 	conf := config{
-		commands: getCommands(),
+		commands:    getCommands(),
+		callPokeApi: getPokeResponse,
 	}
 	startRepl(&conf)
 }

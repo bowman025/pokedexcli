@@ -26,7 +26,7 @@ func commandHelp(conf *config) error {
 }
 
 func commandMap(conf *config) error {
-	pokeRes, err := conf.callPokeApi(conf.nextLocationsURL)
+	pokeRes, err := conf.pokeApiClient.GetPokeResponse(conf.nextLocationsURL)
 	if err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func commandMapB(conf *config) error {
 		return nil
 	}
 
-	pokeRes, err := conf.callPokeApi(conf.prevLocationsURL)
+	pokeRes, err := conf.pokeApiClient.GetPokeResponse(conf.prevLocationsURL)
 	if err != nil {
 		return err
 	}

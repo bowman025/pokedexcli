@@ -13,7 +13,7 @@ type config struct {
 	commands         map[string]cliCommand
 	nextLocationsURL *string
 	prevLocationsURL *string
-	callPokeApi      func(*string) (pokeapi.PokeResponse, error)
+	pokeApiClient    pokeapi.Client
 }
 
 type cliCommand struct {
@@ -36,12 +36,12 @@ func getCommands() map[string]cliCommand {
 		},
 		"map": {
 			name:        "map",
-			description: "Displays 20 location areas",
+			description: "Get next 20 location areas",
 			callback:    commandMap,
 		},
 		"mapb": {
 			name:        "mapb",
-			description: "Displays previous 20 location areas",
+			description: "Get previous 20 location areas",
 			callback:    commandMapB,
 		},
 	}

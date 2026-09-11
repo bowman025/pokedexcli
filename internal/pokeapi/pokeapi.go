@@ -19,7 +19,7 @@ type LocationArea struct {
 	Url  string `json:"url"`
 }
 
-func GetPokeResponse(urlAddress *string) (PokeResponse, error) {
+func (c *Client) GetPokeResponse(urlAddress *string) (PokeResponse, error) {
 	urlValue := "https://pokeapi.co/api/v2/location-area"
 	if urlAddress != nil {
 		urlValue = *urlAddress

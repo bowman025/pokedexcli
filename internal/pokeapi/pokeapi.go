@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net/http"
 )
 
 type PokeResponse struct {
@@ -25,7 +24,17 @@ func (c *Client) GetPokeResponse(urlAddress *string) (PokeResponse, error) {
 		urlValue = *urlAddress
 	}
 
-	res, err := http.Get(urlValue)
+	if data, ok := c.cache.Get(urlValue); ok {
+		pokeRes := PokeResponse{}
+		err := json.Unmarshal(data, &pokeRes)
+		if err != nil {
+			return PokeResponse{}, fmt.Errorf("error during unmarshal: %v", err)
+		}
+
+		return pokeRes, nil
+	}
+
+	res, err := c.httpClient.Get(urlValue)
 	if err != nil {
 		return PokeResponse{}, fmt.Errorf("API error: %v", err)
 	}
@@ -41,6 +50,8 @@ func (c *Client) GetPokeResponse(urlAddress *string) (PokeResponse, error) {
 	if err != nil {
 		return PokeResponse{}, fmt.Errorf("error during unmarshal: %v", err)
 	}
+
+	c.cache.Add(urlValue, data)
 
 	return pokeRes, nil
 }

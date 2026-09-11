@@ -5,14 +5,14 @@ import (
 	"os"
 )
 
-func commandExit(conf *config) error {
+func commandExit(conf *config, param string) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 
 	return nil
 }
 
-func commandHelp(conf *config) error {
+func commandHelp(conf *config, param string) error {
 	_, err := fmt.Printf("Welcome to the Pokedex!\nUsage:\n")
 	if err != nil {
 		return err
@@ -25,8 +25,8 @@ func commandHelp(conf *config) error {
 	return nil
 }
 
-func commandMap(conf *config) error {
-	pokeRes, err := conf.pokeApiClient.GetPokeResponse(conf.nextLocationsURL)
+func commandMap(conf *config, param string) error {
+	pokeRes, err := conf.pokeApiClient.GetLocationList(conf.nextLocationsURL)
 	if err != nil {
 		return err
 	}
@@ -41,13 +41,13 @@ func commandMap(conf *config) error {
 	return nil
 }
 
-func commandMapB(conf *config) error {
+func commandMapB(conf *config, param string) error {
 	if conf.prevLocationsURL == nil {
 		fmt.Println("you're on the first page")
 		return nil
 	}
 
-	pokeRes, err := conf.pokeApiClient.GetPokeResponse(conf.prevLocationsURL)
+	pokeRes, err := conf.pokeApiClient.GetLocationList(conf.prevLocationsURL)
 	if err != nil {
 		return err
 	}
@@ -59,5 +59,9 @@ func commandMapB(conf *config) error {
 		fmt.Println(locArea.Name)
 	}
 
+	return nil
+}
+
+func commandExplore(conf *config, param string) error {
 	return nil
 }

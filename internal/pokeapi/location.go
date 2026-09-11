@@ -2,6 +2,7 @@ package pokeapi
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 )
@@ -77,6 +78,10 @@ func (c *Client) GetLocation(location string) (Location, error) {
 		return Location{}, fmt.Errorf("API error: %v", err)
 	}
 	defer res.Body.Close()
+
+	if res.StatusCode < 200 || res.StatusCode > 299 {
+		return Location{}, errors.New("location not found")
+	}
 
 	data, err := io.ReadAll(res.Body)
 	if err != nil {

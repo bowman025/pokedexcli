@@ -31,13 +31,13 @@ func TestCleanInput(t *testing.T) {
 		actual := cleanInput(c.input)
 
 		if len(actual) != len(c.expected) {
-			t.Errorf("For input %q: expected length %d, got %d", c.input, len(c.expected), len(actual))
+			t.Errorf("for input %q: expected length %d, got %d", c.input, len(c.expected), len(actual))
 			continue
 		}
 
 		for i := range actual {
 			if actual[i] != c.expected[i] {
-				t.Errorf("For input %q at index %d: expected %q, got %q", c.input, i, c.expected[i], actual[i])
+				t.Errorf("for input %q at index %d: expected %q, got %q", c.input, i, c.expected[i], actual[i])
 			}
 
 		}

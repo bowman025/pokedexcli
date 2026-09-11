@@ -55,7 +55,7 @@ func startRepl(conf *config) {
 
 		if !scanner.Scan() {
 			if err := scanner.Err(); err != nil {
-				fmt.Printf("Error reading input: %v\n", err)
+				fmt.Printf("error reading input: %v\n", err)
 			}
 			break
 		}
@@ -70,13 +70,13 @@ func startRepl(conf *config) {
 
 		cmd, exists := conf.commands[commandName]
 		if !exists {
-			fmt.Println("Unknown command")
+			fmt.Println("unknown command")
 			continue
 		}
 
 		err := cmd.callback(conf)
 		if err != nil {
-			fmt.Printf("Error: %v\n", err)
+			fmt.Printf("error: %v\n", err)
 		}
 	}
 }
